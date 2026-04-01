@@ -99,10 +99,11 @@ export default async function GenerateWorksheetPage({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-x-12 gap-y-8">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                         {questions.map((question, index) => (
-                            <div key={index} className="text-lg leading-8">
-                                {index + 1}. {question}
+                            <div key={index} className="text-sm leading-6 flex">
+                                <span className="inline-block w-8 shrink-0">{index + 1})</span>
+                                <span>{question}</span>
                             </div>
                         ))}
                     </div>

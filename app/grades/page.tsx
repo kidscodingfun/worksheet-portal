@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function GradesPage({
     searchParams,
@@ -36,7 +36,8 @@ export default async function GradesPage({
             <Link href="/" className="underline text-sm">
                 ← Back to Home
             </Link>
-            <h1 className="text-2xl font-bold mb-6">
+
+            <h1 className="text-2xl font-bold mb-6 mt-4">
                 {grade ? grade.name : "Grade"}
             </h1>
 
@@ -46,25 +47,59 @@ export default async function GradesPage({
                 </pre>
             ) : null}
 
-            <h2 className="text-xl font-semibold mb-3">Topics</h2>
+            <h2 className="text-xl font-semibold mb-3">Choose up to 4 topics</h2>
 
             {topicsError ? (
                 <pre className="bg-red-50 p-4 rounded border text-sm overflow-auto">
                     {JSON.stringify(topicsError, null, 2)}
                 </pre>
             ) : topics && topics.length > 0 ? (
-                <ul className="space-y-2">
-                    {topics.map((topic) => (
-                        <li key={topic.id} className="border rounded p-3">
-                            <Link href={`/topics/${topic.id}`} className="font-medium underline">
-                                {topic.name}
-                            </Link>
-                            {topic.description ? (
-                                <div className="text-sm text-gray-600">{topic.description}</div>
-                            ) : null}
-                        </li>
-                    ))}
-                </ul>
+                <form action="/worksheets/mixed" method="get" className="space-y-4">
+                    <input type="hidden" name="gradeId" value={gradeIdNumber} />
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Difficulty</label>
+                        <select
+                            name="difficulty"
+                            className="border rounded px-3 py-2 text-sm"
+                            defaultValue="easy"
+                        >
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        {topics.map((topic) => (
+                            <label
+                                key={topic.id}
+                                className="flex items-start gap-3 border rounded p-3"
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="topicIds"
+                                    value={topic.id}
+                                    className="mt-1"
+                                />
+                                <div>
+                                    <div className="font-medium">{topic.name}</div>
+                                    {topic.description ? (
+                                        <div className="text-sm text-gray-600">
+                                            {topic.description}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </label>
+                        ))}
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="rounded bg-black text-white px-4 py-2 text-sm"
+                    >
+                        Generate Worksheet
+                    </button>
+                </form>
             ) : (
                 <p>No topics found for this grade.</p>
             )}
