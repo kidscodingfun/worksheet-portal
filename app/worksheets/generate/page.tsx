@@ -53,7 +53,7 @@ export default async function GenerateWorksheetPage({
     let questions: string[] = [];
 
     try {
-        questions = generateQuestionsFromTemplate(template.rule_json, actualSeed);
+        questions = generateQuestionsFromTemplate(template.rule_json);
     } catch (error) {
         return (
             <main className="min-h-screen p-8">
