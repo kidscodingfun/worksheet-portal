@@ -30,7 +30,14 @@ export async function GET(request: Request) {
     );
   }
 
-let questions: string[] = [];
+
+
+type GeneratedQuestion = {
+  prompt: string;
+  answer: string;
+};
+
+let questions: GeneratedQuestion[] = [];
 
 try {
   questions = generateQuestionsFromTemplate(template.rule_json);
