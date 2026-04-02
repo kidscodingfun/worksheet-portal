@@ -33,7 +33,7 @@ export default function RootLayout({
           {children}
         </div>
 
-        <footer className="border-t pt-6 pb-6 text-center text-sm text-gray-600 bg-white">
+        <footer className="no-print border-t pt-6 pb-6 text-center text-sm text-gray-600 bg-white">
           <p>
             Looking for coding resources for kids in Kitchener-Waterloo?{" "}
             <a

@@ -1,3 +1,8 @@
+export type GeneratedQuestion = {
+  prompt: string;
+  answer: string;
+};
+
 type FractionOperation =
   | "equivalent"
   | "compare"
@@ -34,29 +39,33 @@ type Fraction = {
   denominator: number;
 };
 
-export function generateFractionsBasicQuestions(ruleJson: TemplateRuleJson) {
-  const questions: string[] = [];
+export function generateFractionsBasicQuestions(
+  ruleJson: TemplateRuleJson
+): GeneratedQuestion[] {
+  const questions: GeneratedQuestion[] = [];
   const seen = new Set<string>();
 
   const count = ruleJson.question_count;
   const rules = ruleJson.rules;
 
   while (questions.length < count) {
-    let question = "";
+    let prompt = "";
+    let answer = "";
     let key = "";
 
     if (rules.operation === "equivalent") {
       const base = generateFraction(rules);
+      const simplifiedBase = simplify(base);
       const multiplier = randomInt(2, 6);
 
-      const left = simplify(base);
-      const right = {
-        numerator: left.numerator * multiplier,
-        denominator: left.denominator * multiplier,
+      const equivalent = {
+        numerator: simplifiedBase.numerator * multiplier,
+        denominator: simplifiedBase.denominator * multiplier,
       };
 
-      question = `${formatFraction(left)} = _____ / ${right.denominator}`;
-      key = `equivalent:${left.numerator}/${left.denominator}:${right.denominator}`;
+      prompt = `${formatFraction(simplifiedBase)} = _____ / ${equivalent.denominator}`;
+      answer = String(equivalent.numerator);
+      key = `equivalent:${simplifiedBase.numerator}/${simplifiedBase.denominator}:${equivalent.denominator}`;
     }
 
     if (rules.operation === "compare") {
@@ -65,49 +74,60 @@ export function generateFractionsBasicQuestions(ruleJson: TemplateRuleJson) {
 
       if (sameFraction(a, b)) continue;
 
-      question = `${formatFraction(a)}  ___  ${formatFraction(b)}`;
+      prompt = `${formatFraction(a)}  ___  ${formatFraction(b)}`;
+      answer = compareFractions(a, b);
       key = `compare:${a.numerator}/${a.denominator}:${b.numerator}/${b.denominator}`;
     }
 
     if (rules.operation === "simplify") {
       const base = generateFraction(rules);
-      const multiplier = randomInt(2, 6);
+      const simplifiedBase = simplify(base);
 
-      const unsimplified = {
-        numerator: base.numerator * multiplier,
-        denominator: base.denominator * multiplier,
-      };
+      if (sameFraction(base, simplifiedBase)) {
+        const multiplier = randomInt(2, 6);
+        const unsimplified = {
+          numerator: simplifiedBase.numerator * multiplier,
+          denominator: simplifiedBase.denominator * multiplier,
+        };
 
-      question = `Simplify ${formatFraction(unsimplified)}`;
-      key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
+        prompt = `Simplify ${formatFraction(unsimplified)}`;
+        answer = formatFraction(simplifiedBase);
+        key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
+      } else {
+        prompt = `Simplify ${formatFraction(base)}`;
+        answer = formatFraction(simplifiedBase);
+        key = `simplify:${base.numerator}/${base.denominator}`;
+      }
     }
 
     if (rules.operation === "add") {
       const a = generateFraction(rules);
-      const b = generateFraction({
-        ...rules,
-        min_denominator: rules.like_denominators_only ? a.denominator : rules.min_denominator,
-        max_denominator: rules.like_denominators_only ? a.denominator : rules.max_denominator,
-      });
+      const b = generateFractionForOperation(rules, a);
 
-      question = `${formatFraction(a)} + ${formatFraction(b)} = _____`;
+      const result = addFractions(a, b);
+      const finalResult = rules.simplify_answers === false ? result : simplify(result);
+
+      prompt = `${formatFraction(a)} + ${formatFraction(b)} = _____`;
+      answer = formatFraction(finalResult);
       key = `add:${a.numerator}/${a.denominator}:${b.numerator}/${b.denominator}`;
     }
 
     if (rules.operation === "subtract") {
       const a = generateFraction(rules);
-      const b = generateFraction({
-        ...rules,
-        min_denominator: rules.like_denominators_only ? a.denominator : rules.min_denominator,
-        max_denominator: rules.like_denominators_only ? a.denominator : rules.max_denominator,
-      });
+      const b = generateFractionForOperation(rules, a);
 
       if (rules.non_negative_only) {
         const diff = fractionToNumber(a) - fractionToNumber(b);
         if (diff < 0) continue;
       }
 
-      question = `${formatFraction(a)} - ${formatFraction(b)} = _____`;
+      const result = subtractFractions(a, b);
+      if (result.numerator < 0) continue;
+
+      const finalResult = rules.simplify_answers === false ? result : simplify(result);
+
+      prompt = `${formatFraction(a)} - ${formatFraction(b)} = _____`;
+      answer = formatFraction(finalResult);
       key = `subtract:${a.numerator}/${a.denominator}:${b.numerator}/${b.denominator}`;
     }
 
@@ -121,7 +141,8 @@ export function generateFractionsBasicQuestions(ruleJson: TemplateRuleJson) {
         denominator,
       };
 
-      question = `Convert ${formatFraction(improper)} to a mixed number`;
+      prompt = `Convert ${formatFraction(improper)} to a mixed number`;
+      answer = improperToMixed(improper);
       key = `improper_to_mixed:${improper.numerator}/${improper.denominator}`;
     }
 
@@ -130,18 +151,27 @@ export function generateFractionsBasicQuestions(ruleJson: TemplateRuleJson) {
       const whole = randomInt(1, 5);
       const numerator = randomInt(1, denominator - 1);
 
-      question = `Convert ${whole} ${formatFraction({ numerator, denominator })} to an improper fraction`;
+      prompt = `Convert ${whole} ${formatFraction({
+        numerator,
+        denominator,
+      })} to an improper fraction`;
+
+      answer = formatFraction({
+        numerator: whole * denominator + numerator,
+        denominator,
+      });
+
       key = `mixed_to_improper:${whole}:${numerator}/${denominator}`;
     }
 
-    if (!question) continue;
+    if (!prompt) continue;
 
     if (rules.unique_questions && seen.has(key)) {
       continue;
     }
 
     seen.add(key);
-    questions.push(question);
+    questions.push({ prompt, answer });
   }
 
   return questions;
@@ -154,7 +184,10 @@ function generateFraction(rules: FractionRules): Fraction {
   const maxNumeratorDefault = rules.proper_only ? denominator - 1 : denominator * 2;
   const maxNumerator = Math.max(
     minNumerator,
-    Math.min(rules.max_numerator ?? maxNumeratorDefault, rules.proper_only ? denominator - 1 : rules.max_numerator ?? maxNumeratorDefault)
+    Math.min(
+      rules.max_numerator ?? maxNumeratorDefault,
+      rules.proper_only ? denominator - 1 : rules.max_numerator ?? maxNumeratorDefault
+    )
   );
 
   let numerator = randomInt(minNumerator, maxNumerator);
@@ -166,12 +199,105 @@ function generateFraction(rules: FractionRules): Fraction {
   return { numerator, denominator };
 }
 
+function generateFractionForOperation(rules: FractionRules, first: Fraction): Fraction {
+  if (rules.like_denominators_only) {
+    const minNumerator = rules.min_numerator ?? 1;
+    const maxNumeratorDefault = rules.proper_only
+      ? first.denominator - 1
+      : first.denominator * 2;
+    const maxNumerator = Math.max(
+      minNumerator,
+      Math.min(
+        rules.max_numerator ?? maxNumeratorDefault,
+        rules.proper_only ? first.denominator - 1 : rules.max_numerator ?? maxNumeratorDefault
+      )
+    );
+
+    let numerator = randomInt(minNumerator, maxNumerator);
+
+    if (rules.proper_only && numerator >= first.denominator) {
+      numerator = Math.max(1, first.denominator - 1);
+    }
+
+    return {
+      numerator,
+      denominator: first.denominator,
+    };
+  }
+
+  return generateFraction(rules);
+}
+
 function simplify(fraction: Fraction): Fraction {
+  if (fraction.numerator === 0) {
+    return { numerator: 0, denominator: 1 };
+  }
+
   const divisor = gcd(fraction.numerator, fraction.denominator);
+  const normalizedDenominator = fraction.denominator / divisor;
+  const normalizedNumerator = fraction.numerator / divisor;
+
+  if (normalizedDenominator < 0) {
+    return {
+      numerator: -normalizedNumerator,
+      denominator: -normalizedDenominator,
+    };
+  }
+
   return {
-    numerator: fraction.numerator / divisor,
-    denominator: fraction.denominator / divisor,
+    numerator: normalizedNumerator,
+    denominator: normalizedDenominator,
   };
+}
+
+function addFractions(a: Fraction, b: Fraction): Fraction {
+  return {
+    numerator: a.numerator * b.denominator + b.numerator * a.denominator,
+    denominator: a.denominator * b.denominator,
+  };
+}
+
+function subtractFractions(a: Fraction, b: Fraction): Fraction {
+  return {
+    numerator: a.numerator * b.denominator - b.numerator * a.denominator,
+    denominator: a.denominator * b.denominator,
+  };
+}
+
+function compareFractions(a: Fraction, b: Fraction): "<" | ">" | "=" {
+  const left = a.numerator * b.denominator;
+  const right = b.numerator * a.denominator;
+
+  if (left < right) return "<";
+  if (left > right) return ">";
+  return "=";
+}
+
+function improperToMixed(fraction: Fraction): string {
+  const simplifiedFraction = simplify(fraction);
+  const whole = Math.floor(simplifiedFraction.numerator / simplifiedFraction.denominator);
+  const remainder = simplifiedFraction.numerator % simplifiedFraction.denominator;
+
+  if (remainder === 0) {
+    return String(whole);
+  }
+
+  return `${whole} ${remainder}/${simplifiedFraction.denominator}`;
+}
+
+function formatFraction(fraction: Fraction): string {
+  const simplifiedFraction = simplify(fraction);
+  return `${simplifiedFraction.numerator}/${simplifiedFraction.denominator}`;
+}
+
+function fractionToNumber(fraction: Fraction): number {
+  return fraction.numerator / fraction.denominator;
+}
+
+function sameFraction(a: Fraction, b: Fraction): boolean {
+  const sa = simplify(a);
+  const sb = simplify(b);
+  return sa.numerator === sb.numerator && sa.denominator === sb.denominator;
 }
 
 function gcd(a: number, b: number): number {
@@ -185,18 +311,6 @@ function gcd(a: number, b: number): number {
   }
 
   return x || 1;
-}
-
-function formatFraction(fraction: Fraction): string {
-  return `${fraction.numerator}/${fraction.denominator}`;
-}
-
-function fractionToNumber(fraction: Fraction): number {
-  return fraction.numerator / fraction.denominator;
-}
-
-function sameFraction(a: Fraction, b: Fraction): boolean {
-  return a.numerator === b.numerator && a.denominator === b.denominator;
 }
 
 function randomInt(min: number, max: number) {

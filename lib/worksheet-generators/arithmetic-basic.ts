@@ -20,10 +20,15 @@ type TemplateRuleJson = {
   rules: ArithmeticRules;
 };
 
+export type GeneratedQuestion = {
+  prompt: string;
+  answer: string;
+};
+
 export function generateArithmeticBasicQuestions(
   ruleJson: TemplateRuleJson
-) {
-  const questions: string[] = [];
+): GeneratedQuestion[] {
+  const questions: GeneratedQuestion[] = [];
   const seen = new Set<string>();
 
   const count = ruleJson.question_count;
@@ -33,7 +38,8 @@ export function generateArithmeticBasicQuestions(
     const a = randomInt(rules.min_a, rules.max_a);
     const b = randomInt(rules.min_b, rules.max_b);
 
-    let question = "";
+    let prompt = "";
+    let answer = "";
     let key = "";
 
     if (rules.operation === "addition") {
@@ -45,7 +51,8 @@ export function generateArithmeticBasicQuestions(
         continue;
       }
 
-      question = `${a} + ${b} = _____`;
+      prompt = `${a} + ${b} = _____`;
+      answer = String(a + b);
       key = `${a}+${b}`;
     }
 
@@ -65,12 +72,14 @@ export function generateArithmeticBasicQuestions(
         continue;
       }
 
-      question = `${top} - ${bottom} = _____`;
+      prompt = `${top} - ${bottom} = _____`;
+      answer = String(top - bottom);
       key = `${top}-${bottom}`;
     }
 
     if (rules.operation === "multiplication") {
-      question = `${a} × ${b} = _____`;
+      prompt = `${a} × ${b} = _____`;
+      answer = String(a * b);
       key = `${a}*${b}`;
     }
 
@@ -78,26 +87,28 @@ export function generateArithmeticBasicQuestions(
       if (b === 0) continue;
 
       if (rules.exact_division_only) {
-        const answer = a;
+        const quotient = a;
         const divisor = b;
-        const dividend = answer * divisor;
+        const dividend = quotient * divisor;
 
-        question = `${dividend} ÷ ${divisor} = _____`;
+        prompt = `${dividend} ÷ ${divisor} = _____`;
+        answer = String(quotient);
         key = `${dividend}/${divisor}`;
       } else {
-        question = `${a} ÷ ${b} = _____`;
+        prompt = `${a} ÷ ${b} = _____`;
+        answer = String(a / b);
         key = `${a}/${b}`;
       }
     }
 
-    if (!question) continue;
+    if (!prompt) continue;
 
     if (rules.unique_questions && seen.has(key)) {
       continue;
     }
 
     seen.add(key);
-    questions.push(question);
+    questions.push({ prompt, answer });
   }
 
   return questions;

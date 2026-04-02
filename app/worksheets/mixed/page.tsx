@@ -100,10 +100,8 @@ export default async function MixedWorksheetPage({
         topics?: { name: string } | Array<{ name: string }> | null;
     };
 
-    const sections = (templates as TemplateRow[]).map((template, index) => {
-        const fullQuestions = generateQuestionsFromTemplate(
-            template.rule_json
-        );
+    const sections = (templates as TemplateRow[]).map((template) => {
+        const fullQuestions = generateQuestionsFromTemplate(template.rule_json);
 
         const topicName = Array.isArray(template.topics)
             ? template.topics[0]?.name
@@ -169,12 +167,12 @@ export default async function MixedWorksheetPage({
                                             {section.topicName}
                                         </h2>
 
-                                        <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                                        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                                             {section.questions.map((question, questionIndex) => {
                                                 const currentNumber = runningNumber++;
                                                 return (
                                                     <div key={questionIndex} className="text-sm leading-6">
-                                                        {currentNumber}) {question}
+                                                        {currentNumber}) {question.prompt}
                                                     </div>
                                                 );
                                             })}
@@ -185,6 +183,28 @@ export default async function MixedWorksheetPage({
                                 return sectionBlock;
                             });
                         })()}
+                    </div>
+                    <div className="mt-6 pt-3 border-t-2 border-dashed border-gray-400">
+                        <div className="answer-key text-[9px] leading-3 text-gray-700">
+                            <h3 className="font-semibold mb-1 text-[10px]">Answer Key</h3>
+
+                            <div className="flex flex-wrap gap-x-3 gap-y-1">
+                                {(() => {
+                                    let runningAnswerNumber = 1;
+
+                                    return sections.flatMap((section) =>
+                                        section.questions.map((question, questionIndex) => {
+                                            const currentNumber = runningAnswerNumber++;
+                                            return (
+                                                <span key={`${section.topicName}-${questionIndex}`}>
+                                                    {currentNumber}) {question.answer}
+                                                </span>
+                                            );
+                                        })
+                                    );
+                                })()}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

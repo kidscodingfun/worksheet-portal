@@ -1,3 +1,8 @@
+export type GeneratedQuestion = {
+  prompt: string;
+  answer: string;
+};
+
 type DecimalRules = {
   operation: "addition" | "subtraction" | "multiplication" | "division";
   min_whole: number;
@@ -21,8 +26,8 @@ type TemplateRuleJson = {
 
 export function generateDecimalsBasicQuestions(
   ruleJson: TemplateRuleJson
-) {
-  const questions: string[] = [];
+): GeneratedQuestion[] {
+  const questions: GeneratedQuestion[] = [];
   const seen = new Set<string>();
 
   const count = ruleJson.question_count;
@@ -41,14 +46,16 @@ export function generateDecimalsBasicQuestions(
       rules.decimal_places
     );
 
-    let question = "";
+    let prompt = "";
+    let answer = "";
     let key = "";
 
     if (rules.operation === "addition") {
-      question = `${formatNumber(a, rules.decimal_places)} + ${formatNumber(
+      prompt = `${formatNumber(a, rules.decimal_places)} + ${formatNumber(
         b,
         rules.decimal_places
       )} = _____`;
+      answer = formatNumber(a + b, rules.decimal_places);
       key = `${a}+${b}`;
     }
 
@@ -57,18 +64,20 @@ export function generateDecimalsBasicQuestions(
         continue;
       }
 
-      question = `${formatNumber(a, rules.decimal_places)} - ${formatNumber(
+      prompt = `${formatNumber(a, rules.decimal_places)} - ${formatNumber(
         b,
         rules.decimal_places
       )} = _____`;
+      answer = formatNumber(a - b, rules.decimal_places);
       key = `${a}-${b}`;
     }
 
     if (rules.operation === "multiplication") {
-      question = `${formatNumber(a, rules.decimal_places)} × ${formatNumber(
+      prompt = `${formatNumber(a, rules.decimal_places)} × ${formatNumber(
         b,
         rules.decimal_places
       )} = _____`;
+      answer = formatNumber(a * b, rules.decimal_places * 2);
       key = `${a}*${b}`;
     }
 
@@ -83,28 +92,30 @@ export function generateDecimalsBasicQuestions(
           rules.decimal_places
         );
 
-        question = `${formatNumber(
+        prompt = `${formatNumber(
           dividend,
           rules.decimal_places
         )} ÷ ${formatNumber(divisor, rules.decimal_places)} = _____`;
+        answer = formatNumber(quotient, rules.decimal_places);
         key = `${dividend}/${divisor}`;
       } else {
-        question = `${formatNumber(a, rules.decimal_places)} ÷ ${formatNumber(
+        prompt = `${formatNumber(a, rules.decimal_places)} ÷ ${formatNumber(
           b,
           rules.decimal_places
         )} = _____`;
+        answer = String(a / b);
         key = `${a}/${b}`;
       }
     }
 
-    if (!question) continue;
+    if (!prompt) continue;
 
     if (rules.unique_questions && seen.has(key)) {
       continue;
     }
 
     seen.add(key);
-    questions.push(question);
+    questions.push({ prompt, answer });
   }
 
   return questions;

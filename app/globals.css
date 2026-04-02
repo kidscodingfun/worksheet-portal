@@ -64,3 +64,7 @@ body {
     padding: 12px !important;
   }
 }
+
+.answer-key {
+  page-break-inside: avoid;
+}
