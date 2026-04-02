@@ -79,25 +79,38 @@ export function generateFractionsBasicQuestions(
       key = `compare:${a.numerator}/${a.denominator}:${b.numerator}/${b.denominator}`;
     }
 
-if (rules.operation === "simplify") {
-  const base = generateFraction({
-    ...rules,
-    proper_only: false,
-  });
+    if (rules.operation === "simplify") {
+      const simplified = generateFraction({
+        ...rules,
+        proper_only: rules.proper_only ?? false,
+      });
 
-  const simplifiedBase = simplify(base);
+      let multiplierMin = 2;
+      let multiplierMax = 4;
 
-  const multiplier = randomInt(2, 6);
+      if (rules.max_denominator >= 12) {
+        multiplierMax = 6;
+      }
 
-  const unsimplified = {
-    numerator: simplifiedBase.numerator * multiplier,
-    denominator: simplifiedBase.denominator * multiplier,
-  };
+      if (rules.max_denominator >= 16) {
+        multiplierMax = 8;
+      }
 
-  prompt = `Simplify ${formatRawFraction(unsimplified)}`;
-  answer = formatFraction(simplifiedBase);
-  key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
-}
+      const multiplier = randomInt(multiplierMin, multiplierMax);
+
+      const unsimplified = {
+        numerator: simplified.numerator * multiplier,
+        denominator: simplified.denominator * multiplier,
+      };
+
+      if (sameFraction(unsimplified, simplify(unsimplified))) {
+        continue;
+      }
+
+      prompt = `Simplify ${formatRawFraction(unsimplified)}`;
+      answer = formatFraction(simplified);
+      key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
+    }
 
     if (rules.operation === "add") {
       const a = generateFraction(rules);
