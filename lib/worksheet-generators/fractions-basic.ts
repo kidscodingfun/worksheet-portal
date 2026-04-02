@@ -79,38 +79,34 @@ export function generateFractionsBasicQuestions(
       key = `compare:${a.numerator}/${a.denominator}:${b.numerator}/${b.denominator}`;
     }
 
-    if (rules.operation === "simplify") {
-      const simplified = generateFraction({
-        ...rules,
-        proper_only: rules.proper_only ?? false,
-      });
+   if (rules.operation === "simplify") {
+  const simplified = generateFraction({
+    ...rules,
+    proper_only: rules.proper_only ?? false,
+  });
 
-      let multiplierMin = 2;
-      let multiplierMax = 4;
+  let multiplierMin = 2;
+  let multiplierMax = 4;
 
-      if (rules.max_denominator >= 12) {
-        multiplierMax = 6;
-      }
+  if (rules.max_denominator >= 10) {
+    multiplierMax = 6;
+  }
 
-      if (rules.max_denominator >= 16) {
-        multiplierMax = 8;
-      }
+  if (rules.max_denominator >= 16) {
+    multiplierMax = 8;
+  }
 
-      const multiplier = randomInt(multiplierMin, multiplierMax);
+  const multiplier = randomInt(multiplierMin, multiplierMax);
 
-      const unsimplified = {
-        numerator: simplified.numerator * multiplier,
-        denominator: simplified.denominator * multiplier,
-      };
+  const unsimplified = {
+    numerator: simplified.numerator * multiplier,
+    denominator: simplified.denominator * multiplier,
+  };
 
-      if (sameFraction(unsimplified, simplify(unsimplified))) {
-        continue;
-      }
-
-      prompt = `Simplify ${formatRawFraction(unsimplified)}`;
-      answer = formatFraction(simplified);
-      key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
-    }
+  prompt = `Simplify ${formatRawFraction(unsimplified)}`;
+  answer = formatFraction(simplified);
+  key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
+}
 
     if (rules.operation === "add") {
       const a = generateFraction(rules);
@@ -328,6 +324,7 @@ function gcd(a: number, b: number): number {
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
 function formatRawFraction(fraction: Fraction): string {
   return `${fraction.numerator}/${fraction.denominator}`;
 }
