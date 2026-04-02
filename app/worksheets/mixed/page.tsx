@@ -119,7 +119,7 @@ export default async function MixedWorksheetPage({
 
     return (
         <main className="min-h-screen bg-white p-4 print:p-0">
-            <div className="mx-auto max-w-3xl space-y-4">
+            <div className="mx-auto max-w-3xl space-y-4  relative z-0">
                 <div className="no-print flex gap-3 flex-wrap">
                     <Link
                         href={`/grades/${gradeIdNumber}`}
@@ -140,7 +140,7 @@ export default async function MixedWorksheetPage({
                     <PrintButton />
                 </div>
 
-                <div className="worksheet-sheet border rounded p-4 bg-white">
+                <div className="worksheet-sheet border rounded p-4 bg-white  relative z-0">
                     <div className="mb-3 border-b pb-2">
                         <h1 className="text-xl font-bold text-center mb-1">
                             {sections.length === 1

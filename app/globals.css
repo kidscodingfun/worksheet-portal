@@ -58,3 +58,9 @@ body {
     margin: 8mm;
   }
 }
+@media (max-width: 640px) {
+  .worksheet-sheet {
+    margin-top: 0;
+    padding: 12px !important;
+  }
+}
