@@ -79,26 +79,25 @@ export function generateFractionsBasicQuestions(
       key = `compare:${a.numerator}/${a.denominator}:${b.numerator}/${b.denominator}`;
     }
 
-    if (rules.operation === "simplify") {
-      const base = generateFraction(rules);
-      const simplifiedBase = simplify(base);
+if (rules.operation === "simplify") {
+  const base = generateFraction({
+    ...rules,
+    proper_only: false,
+  });
 
-      if (sameFraction(base, simplifiedBase)) {
-        const multiplier = randomInt(2, 6);
-        const unsimplified = {
-          numerator: simplifiedBase.numerator * multiplier,
-          denominator: simplifiedBase.denominator * multiplier,
-        };
+  const simplifiedBase = simplify(base);
 
-        prompt = `Simplify ${formatFraction(unsimplified)}`;
-        answer = formatFraction(simplifiedBase);
-        key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
-      } else {
-        prompt = `Simplify ${formatFraction(base)}`;
-        answer = formatFraction(simplifiedBase);
-        key = `simplify:${base.numerator}/${base.denominator}`;
-      }
-    }
+  const multiplier = randomInt(2, 6);
+
+  const unsimplified = {
+    numerator: simplifiedBase.numerator * multiplier,
+    denominator: simplifiedBase.denominator * multiplier,
+  };
+
+  prompt = `Simplify ${formatRawFraction(unsimplified)}`;
+  answer = formatFraction(simplifiedBase);
+  key = `simplify:${unsimplified.numerator}/${unsimplified.denominator}`;
+}
 
     if (rules.operation === "add") {
       const a = generateFraction(rules);
@@ -315,4 +314,7 @@ function gcd(a: number, b: number): number {
 
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function formatRawFraction(fraction: Fraction): string {
+  return `${fraction.numerator}/${fraction.denominator}`;
 }
