@@ -27,7 +27,21 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">{children}
+        <footer className="mt-12 border-t pt-6 text-center text-sm text-gray-600">
+  <p>
+    Looking for coding resources for kids in Kitchener-Waterloo?{" "}
+    <a
+      href="https://www.kidscodingfun.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline hover:text-black"
+    >
+      Visit KidsCodingFun
+    </a>
+  </p>
+</footer>
+      </body>
     </html>
   );
 }
