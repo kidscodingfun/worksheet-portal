@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Math Worksheet Generator for Grades 1–8 | WorksheetWiz",
-  description: "Create printable math worksheets in seconds for Grades 1–8. Choose topics, select difficulty, and generate practice sheets for addition, decimals, fractions, and more.",
+  description:
+    "Create printable math worksheets in seconds for Grades 1–8. Choose topics, select difficulty, and generate practice sheets for addition, decimals, fractions, and more.",
 };
 
 export default function RootLayout({
@@ -27,20 +28,24 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}
-        <footer className="mt-12 border-t pt-6 text-center text-sm text-gray-600">
-  <p>
-    Looking for coding resources for kids in Kitchener-Waterloo?{" "}
-    <a
-      href="https://www.kidscodingfun.com"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="underline hover:text-black"
-    >
-      Visit KidsCodingFun
-    </a>
-  </p>
-</footer>
+      <body className="min-h-screen flex flex-col bg-white">
+        <div className="flex-1">
+          {children}
+        </div>
+
+        <footer className="border-t pt-6 pb-6 text-center text-sm text-gray-600 bg-white">
+          <p>
+            Looking for coding resources for kids in Kitchener-Waterloo?{" "}
+            <a
+              href="https://www.kidscodingfun.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-black"
+            >
+              Visit KidsCodingFun
+            </a>
+          </p>
+        </footer>
       </body>
     </html>
   );

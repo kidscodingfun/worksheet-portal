@@ -101,8 +101,6 @@ export default async function MixedWorksheetPage({
     };
 
     const sections = (templates as TemplateRow[]).map((template, index) => {
-        const sectionSeed = `${actualSeed}-${template.id}-${index}`;
-
         const fullQuestions = generateQuestionsFromTemplate(
             template.rule_json
         );
