@@ -1,4 +1,6 @@
 import { generateArithmeticBasicQuestions } from "./arithmetic-basic";
+import { generateDecimalsBasicQuestions } from "./decimals-basic";
+import { generateFractionsBasicQuestions } from "./fractions-basic";
 
 type RuleJson = {
   engine?: string;
@@ -18,6 +20,16 @@ export function generateQuestionsFromTemplate(ruleJson: RuleJson) {
     case "arithmetic_basic":
       return generateArithmeticBasicQuestions(
         ruleJson as Parameters<typeof generateArithmeticBasicQuestions>[0]
+      );
+
+    case "decimals_basic":
+      return generateDecimalsBasicQuestions(
+        ruleJson as Parameters<typeof generateDecimalsBasicQuestions>[0]
+      );
+
+    case "fractions_basic":
+      return generateFractionsBasicQuestions(
+        ruleJson as Parameters<typeof generateFractionsBasicQuestions>[0]
       );
 
     default:
