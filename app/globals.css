@@ -23,10 +23,6 @@ body {
   min-height: 100%;
 }
 
-.no-print {
-  display: block;
-}
-
 @media print {
   .no-print {
     display: none !important;

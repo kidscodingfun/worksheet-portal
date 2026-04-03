@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { generateQuestionsFromTemplate } from "@/lib/worksheet-generators/generate-from-template";
 import PrintButton from "@/components/print-button";
+import DownloadPdfButton from "@/components/download-pdf-button";
 
 function createSeed() {
     return Math.random().toString(36).slice(2, 10);
@@ -134,6 +135,17 @@ export default async function MixedWorksheetPage({
                     </Link>
 
                     <PrintButton />
+
+                    <DownloadPdfButton
+                        title={
+                            sections.length === 1
+                                ? `${sections[0].topicName} Worksheet`
+                                : `${grade?.name || "Grade"} Mixed Worksheet`
+                        }
+                        gradeName={grade?.name || "Grade"}
+                        difficulty={selectedDifficulty}
+                        sections={sections}
+                    />
                 </div>
 
                 <div className="worksheet-sheet border rounded p-4 bg-white  relative z-0">
